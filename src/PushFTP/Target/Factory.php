@@ -1,6 +1,6 @@
 <?php
 
-namespace Pusher\Target;
+namespace PushFTP\Target;
 
 class Factory
 {
@@ -20,5 +20,3 @@ class Factory
 		return $target;
 	}
 }
-
-?>

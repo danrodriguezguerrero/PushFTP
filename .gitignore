@@ -1,8 +1,13 @@
+# System, IDE, ...
 .DS_Store
+.idea
 
+# Composer
 composer.phar
 composer.lock
+vendor/*
+!vendor/PEAR
 
-vendor/autoload.php
-vendor/symfony
-vendor/composer
+# Git
+!.gitkeep
+.git

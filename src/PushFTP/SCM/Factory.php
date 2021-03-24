@@ -1,6 +1,6 @@
 <?php
 
-namespace Pusher\SCM;
+namespace PushFTP\SCM;
 
 class Factory
 {
@@ -33,5 +33,3 @@ class Factory
 		return 'not detected';
 	}
 }
-
-?>

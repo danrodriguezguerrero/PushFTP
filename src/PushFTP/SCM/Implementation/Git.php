@@ -1,8 +1,8 @@
 <?php
 
-namespace Pusher\SCM\Implementation;
+namespace PushFTP\SCM\Implementation;
 
-class Git extends \Pusher\SCM\AbstractSCM
+class Git extends \PushFTP\SCM\AbstractSCM
 {
 	protected function _detect($root_path)
 	{
@@ -28,8 +28,7 @@ class Git extends \Pusher\SCM\AbstractSCM
 			throw new \Exception($error, 1);
 		}
 
-		// TODO: enhance search for initial commit (might not be master)
-		return 'master'.'@'.$version;
+		return $this->getTagOrBranchForCommit($version).'@'.$version;
 	}
 
 	protected function _getCurrentVersion()
@@ -51,7 +50,7 @@ class Git extends \Pusher\SCM\AbstractSCM
 			throw new \Exception($error, 1);
 		}
 		
-		return $this->repo_lpath.'@'.$version;
+		return $this->getTagOrBranchForCommit($version).'@'.$version;
 	}
 
 	protected function _getChanges($rev, $newrev)
@@ -59,7 +58,7 @@ class Git extends \Pusher\SCM\AbstractSCM
 		$rev = substr($rev, strpos($rev, '@')+1);
 		$newrev = substr($newrev, strpos($newrev, '@')+1);
 		
-		exec('cd '.$this->root_path.' && git diff --name-status '.$rev.'..'.$newrev.'', $output, $return_var);
+		exec('cd '.$this->root_path.' && git diff --name-status --relative '.$rev.'..'.$newrev.'', $output, $return_var);
 		if ($return_var != 0) {
 			return false;
 		}
@@ -103,6 +102,35 @@ class Git extends \Pusher\SCM\AbstractSCM
 		
 		return ($return_var == 0);
 	}
-}
 
-?>
+
+	private function getTagOrBranchForCommit($commithash)
+	{
+		// Checking if the commit belongs to a tag
+		$tag = exec('cd '.$this->root_path.' && git tag --points-at '.$commithash.' --no-column');
+		$tag = trim($tag);
+
+		if (!empty($tag)) {
+			return $tag;
+		}
+
+		// Checking if the commit belongs to a remote branch
+		$branch = exec('cd '.$this->root_path.' && git branch --remotes --contains '.$commithash.' --no-color --no-column');
+		$branch = trim($branch);
+
+		if (!empty($branch)) {
+			return $branch;
+		}
+
+		// Checking if the commit belongs to a local branch
+		$branch = exec('cd '.$this->root_path.' && git branch --contains '.$commithash.' --no-color --no-column');
+		$branch = str_replace('* ', '', $branch);
+		$branch = trim($branch);
+
+		if (!empty($branch)) {
+			return $branch;
+		}
+
+		return 'HEAD';
+	}
+}

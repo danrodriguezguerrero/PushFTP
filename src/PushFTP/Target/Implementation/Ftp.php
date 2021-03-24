@@ -1,24 +1,26 @@
 <?php
 
-// Doc : http://phpseclib.sourceforge.net/sftp/intro.html
+// Doc : http://pear.php.net/package/Net_FTP/docs
 
-namespace Pusher\Target\Implementation;
+namespace PushFTP\Target\Implementation;
 
-class Sftp extends \Pusher\Target\AbstractTarget
+class Ftp extends \PushFTP\Target\AbstractTarget
 {
 	protected function ___construct($host, $port = false)
 	{
 		if (!$port) {
-			$port = 22;
+			$port = 21;
 		}
 		
 		$this->host = $host;
 		$this->port = $port;
+		
+		$this->handle = new \Net_FTP($host, $port, 30);
 	}
 
 	protected function _connect()
 	{
-		$this->handle = new \Net_SFTP($this->host, $this->port);
+		return $this->handle->connect();
 	}
 
 	protected function _login($username, $password)
@@ -28,12 +30,12 @@ class Sftp extends \Pusher\Target\AbstractTarget
 
 	protected function _isError($response)
 	{
-		return ($response === false);
+		return \PEAR::isError($response);
 	}
 
 	protected function _setPassive()
 	{
-		return null;
+		return $this->handle->setPassive();
 	}
 
 	protected function _get($remote_path, $local_path)
@@ -43,13 +45,12 @@ class Sftp extends \Pusher\Target\AbstractTarget
 
 	protected function _put($local_path, $remote_path, $overwrite)
 	{
-		// $overwrite is not used as files are Net_SFTP doesn't fail on existing files and always overwrites
-		return $this->handle->put($remote_path, $local_path, NET_SFTP_LOCAL_FILE, -1);
+		return $this->handle->put($local_path, $remote_path, $overwrite);
 	}
 
 	protected function _mkdir($remote_path, $recursive)
 	{
-		return $this->handle->mkdir($remote_path, -1, $recursive);
+		return $this->handle->mkdir($remote_path, $recursive);
 	}
 
 	protected function _pwd()
@@ -59,25 +60,27 @@ class Sftp extends \Pusher\Target\AbstractTarget
 
 	protected function _cd($remote_path)
 	{
-		return $this->handle->chdir($remote_path);
+		return $this->handle->cd($remote_path);
 	}
 
 	protected function _rename($remote_path_from, $remote_path_to)
 	{
-		// first trying to delete the target, since Net_SFTP doesn't seem to perform overwriting
-		$this->handle->delete($remote_path_to, true);
 		return $this->handle->rename($remote_path_from, $remote_path_to);
 	}
 
 	protected function _rm($remote_path, $recursive)
 	{
-		return $this->handle->delete($remote_path, $recursive);
+		return $this->handle->rm($remote_path, $recursive);
 	}
 
 	protected function _chmod($remote_path, $permissions, $recursive)
 	{
-		return $this->handle->chmod($permissions, $remote_path, $recursive);
+		$permissions = decoct($permissions);
+		
+		if (!$recursive) {
+			return $this->handle->chmod($remote_path, $permissions);
+		} else {
+			return $this->handle->chmodRecursive($remote_path, $permissions);
+		}
 	}
 }
-
-?>

@@ -1,6 +1,6 @@
 <?php
 
-namespace Pusher\Target;
+namespace PushFTP\Target;
 
 abstract class AbstractTarget implements TargetInterface
 {
@@ -103,5 +103,3 @@ abstract class AbstractTarget implements TargetInterface
 	}
 	abstract protected function _chmod($remote_path, $permissions, $recursive);
 }
-
-?>

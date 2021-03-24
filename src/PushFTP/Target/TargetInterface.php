@@ -1,6 +1,6 @@
 <?php
 
-namespace Pusher\Target;
+namespace PushFTP\Target;
 
 interface TargetInterface
 {
@@ -24,5 +24,3 @@ interface TargetInterface
 
 	public function chmod($remote_path, $permissions, $recursive = false);
 }
-
-?>

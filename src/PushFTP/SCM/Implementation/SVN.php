@@ -1,8 +1,8 @@
 <?php
 
-namespace Pusher\SCM\Implementation;
+namespace PushFTP\SCM\Implementation;
 
-class SVN extends \Pusher\SCM\AbstractSCM
+class SVN extends \PushFTP\SCM\AbstractSCM
 {
 	protected function _detect($root_path)
 	{
@@ -83,5 +83,3 @@ class SVN extends \Pusher\SCM\AbstractSCM
 		return ($return_var == 0);
 	}
 }
-
-?>
